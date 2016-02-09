@@ -15,7 +15,7 @@ append_to_zshrc() {
   local text="$1" zshrc
   local skip_new_line="${2:-0}"
 
-  if [ -w "$HOME/.zshrc.local" ]; then
+  if [ -w "$HOME/.zshrc.ocal" ]; then
     zshrc="$HOME/.zshrc.local"
   else
     zshrc="$HOME/.zshrc"
@@ -141,18 +141,20 @@ fi
 fancy_echo "Updating Homebrew formulae ..."
 brew_tap 'thoughtbot/formulae'
 
+
 brew update
 
 fancy_echo "Updating Unix tools ..."
 brew_install_or_upgrade 'ctags'
 brew_install_or_upgrade 'git'
-brew_install_or_upgrade 'openssl'
+# brew_install_or_upgrade 'openssl'
 brew_install_or_upgrade 'rcm'
 brew_install_or_upgrade 'reattach-to-user-namespace'
 brew_install_or_upgrade 'the_silver_searcher'
 brew_install_or_upgrade 'tmux'
 brew_install_or_upgrade 'vim'
 brew_install_or_upgrade 'zsh'
+brew_install_or_upgrade 'tig'
 
 fancy_echo "Updating Heroku tools ..."
 brew_install_or_upgrade 'heroku-toolbelt'
@@ -170,8 +172,8 @@ brew_install_or_upgrade 'qt'
 fancy_echo "Updating programming languages ..."
 brew_install_or_upgrade 'libyaml' # should come after openssl
 brew_install_or_upgrade 'node'
-brew_install_or_upgrade 'rbenv'
-brew_install_or_upgrade 'ruby-build'
+# brew_install_or_upgrade 'rbenv'
+# brew_install_or_upgrade 'ruby-build'
 
 fancy_echo "Updating databases ..."
 brew_install_or_upgrade 'postgres'
@@ -179,26 +181,52 @@ brew_install_or_upgrade 'redis'
 brew_launchctl_restart 'postgresql'
 brew_launchctl_restart 'redis'
 
-fancy_echo "Configuring Ruby ..."
-find_latest_ruby() {
-  rbenv install -l | grep -v - | tail -1 | sed -e 's/^ *//'
-}
+# fancy_echo "Configuring Ruby ..."
+# find_latest_ruby() {
+#  rbenv install -l | grep -v - | tail -1 | sed -e 's/^ *//'
+# }
 
-ruby_version="$(find_latest_ruby)"
+# ruby_version="$(find_latest_ruby)"
 # shellcheck disable=SC2016
-append_to_zshrc 'eval "$(rbenv init - --no-rehash)"' 1
-eval "$(rbenv init -)"
+# append_to_zshrc 'eval "$(rbenv init - --no-rehash)"' 1
+# eval "$(rbenv init -)"
 
-if ! rbenv versions | grep -Fq "$ruby_version"; then
-  RUBY_CONFIGURE_OPTS=--with-openssl-dir=/usr/local/opt/openssl rbenv install -s "$ruby_version"
+# if ! rbenv versions | grep -Fq "$ruby_version"; then
+#   RUBY_CONFIGURE_OPTS=--with-openssl-dir=/usr/local/opt/openssl rbenv install -s "$ruby_version"
+# fi
+
+# rbenv global "$ruby_version"
+# rbenv shell "$ruby_version"
+# gem update --system
+
+# append_to_file "$HOME/.gemrc" 'gem: --no-document'
+
+if ! command -v rbenv >/dev/null; then
+  if ! command -v rvm >/dev/null; then
+    fancy_echo 'Installing RVM and the latest Ruby...'
+    curl -L https://get.rvm.io | bash -s stable --ruby --auto-dotfiles --autolibs=enable
+    . ~/.rvm/scripts/rvm
+  else
+    local_version="$(rvm -v 2> /dev/null | awk '$2 != ""{print $2}')"
+    latest_version="$(curl -s https://raw.githubusercontent.com/wayneeseguin/rvm/stable/VERSION)"
+    if [ "$local_version" != "$latest_version" ]; then
+      fancy_echo 'Upgrading RVM...'
+      rvm get stable --auto-dotfiles --autolibs=enable --with-gems="bundler"
+    else
+      fancy_echo "Already using the latest version of RVM. Skipping..."
+    fi
+  fi
 fi
 
-rbenv global "$ruby_version"
-rbenv shell "$ruby_version"
-gem update --system
+# fancy_echo 'Updating Rubygems...'
+# gem update --system
+
 gem_install_or_update 'bundler'
-number_of_cores=$(sysctl -n hw.ncpu)
-bundle config --global jobs $((number_of_cores - 1))
+
+fancy_echo "Configuring Bundler ..."
+  number_of_cores=$(sysctl -n hw.ncpu)
+  bundle config --global jobs $((number_of_cores - 1))
+
 
 if [ -f "$HOME/.laptop.local" ]; then
   fancy_echo "Running your customizations from ~/.laptop.local ..."
