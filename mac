@@ -172,6 +172,10 @@ brew_install_or_upgrade 'qt'
 fancy_echo "Updating programming languages ..."
 brew_install_or_upgrade 'libyaml' # should come after openssl
 brew_install_or_upgrade 'node'
+
+# node stuff for streamdesk
+sudo npm install gulp gulp-sass@2 gulp-watch gulp-sourcemaps gulp-jshint gulp-scss-lint -g node-sass
+
 # brew_install_or_upgrade 'rbenv'
 # brew_install_or_upgrade 'ruby-build'
 
@@ -217,6 +221,10 @@ if ! command -v rbenv >/dev/null; then
     fi
   fi
 fi
+
+# install new ssl certs files
+rvm osx-ssl-certs update all
+
 
 # fancy_echo 'Updating Rubygems...'
 # gem update --system
