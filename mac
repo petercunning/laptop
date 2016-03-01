@@ -182,6 +182,7 @@ sudo npm install gulp gulp-sass@2 gulp-watch gulp-sourcemaps gulp-jshint gulp-sc
 fancy_echo "Updating databases ..."
 brew_install_or_upgrade 'postgres'
 brew_install_or_upgrade 'redis'
+brew_install_or_upgrade 'phantomjs'
 brew_launchctl_restart 'postgresql'
 brew_launchctl_restart 'redis'
 
