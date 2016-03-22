@@ -242,3 +242,5 @@ if [ -f "$HOME/.laptop.local" ]; then
   # shellcheck disable=SC1090
   . "$HOME/.laptop.local"
 fi
+
+echo 'syntax on' > ~/.vimrc
